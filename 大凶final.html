@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>陰府聖籤：血色祭典</title>
+    <style>
+        /* 引入正統中式沉穩襯線體 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: #050505;
+            color: #bcbcbc;
+            font-family: 'Noto Serif TC', 'BiauKai', serif;
+            overflow: hidden;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 嚴格控制亮度：維持極暗的乾涸血漬漸層 */
+            background-image: radial-gradient(circle, #120000 0%, #030303 100%);
+            transition: background 1s ease-in-out;
+            position: relative;
+        }
+
+        /* --- 🕯️ 全螢幕中式恐怖環境結界 (整屏動態變化) --- */
+        body.theme-doom::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            box-shadow: inset 0 0 120px rgba(139, 0, 0, 0.8);
+            pointer-events: none;
+            z-index: 5;
+            animation: ritualBloodPulse 2s infinite alternate;
+        }
+
+        body.theme-hallowed::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            box-shadow: inset 0 0 120px rgba(144, 115, 33, 0.4);
+            pointer-events: none;
+            z-index: 5;
+            animation: ritualGoldPulse 2.5s infinite alternate;
+        }
+
+        /* 儀式性震屏與窒息懸浮 */
+        .shake-screen {
+            animation: ritualShake 0.3s ease-in-out infinite alternate;
+        }
+
+        .float-screen {
+            animation: ritualFloat 4s ease-in-out infinite alternate;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- 頁面 1：開始獻祭頁面 --- */
+        #intro-screen {
+            text-align: center;
+            animation: fadeIn 2s ease-in-out;
+            padding: 20px;
+            z-index: 2;
+        }
+
+        .temple-title {
+            font-size: 4.5rem;
+            color: #7a0000;
+            text-shadow: 0 0 15px #4a0000, 2px 2px 8px #000;
+            letter-spacing: 0.8rem;
+            margin-bottom: 1.5rem;
+            font-weight: 900;
+            animation: candleFlicker 3s infinite;
+        }
+
+        .temple-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 4rem;
+            letter-spacing: 0.3rem;
+        }
+
+        .sacrifice-btn {
+            background: #150000;
+            color: #8b0000;
+            border: 1px solid #4a0000;
+            padding: 18px 50px;
+            font-size: 1.3rem;
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(74, 0, 0, 0.6);
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            letter-spacing: 4px;
+        }
+
+        .sacrifice-btn:hover {
+            background: #5a0000;
+            color: #050505;
+            box-shadow: 0 0 25px #ff0000;
+            border-color: #ff0000;
+        }
+
+        /* --- 頁面 2：抽籤主畫面 --- */
+        #game-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1100px;
+            height: 90vh;
+            height: 90dvh;
+            justify-content: space-between;
+            padding: 20px;
+            z-index: 2;
+        }
+
+        .game-header h2 {
+            font-size: 2.2rem;
+            color: #6a0000;
+            letter-spacing: 0.4rem;
+            text-align: center;
+            font-weight: 900;
+        }
+
+        .hint-text {
+            color: #555;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        /* 經典宮廟對稱中軸排版 */
+        .temple-layout {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+            align-items: center;
+            flex-grow: 1;
+            margin: 20px 0;
+        }
+
+        /* 籤筒重構：沉重老舊木漆質感 */
+        .stick-container {
+            width: 150px;
+            height: 280px;
+            background: linear-gradient(to right, #120202, #2d0505, #120202);
+            border: 3px solid #0d0101;
+            border-top: none;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.9), inset 0 0 30px #000;
+            display: flex;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stick-container::before {
+            content: "聚魂古筒";
+            position: absolute;
+            top: 30px;
+            color: #050505;
+            background: #5a0000;
+            padding: 12px 6px;
+            font-size: 1rem;
+            writing-mode: vertical-rl;
+            text-align: center;
+            letter-spacing: 3px;
+            font-weight: 900;
+            box-shadow: inset 0 0 5px #000;
+        }
+
+        /* 籤牌網格 */
+        .sticks-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            max-width: 550px;
+        }
+
+        .stick-card {
+            width: 85px;
+            height: 135px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.9s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        /* 選定靈籤時的莊嚴血光 */
+        .stick-card.selected .card-front {
+            border-color: #8b0000;
+            box-shadow: 0 0 15px rgba(139, 0, 0, 0.8);
+            background: #1a0000;
+            color: #ff0000;
+            transform: translateY(-8px);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border: 1px solid #2a0505;
+        }
+
+        /* 籤牌正面：老舊紙錢與墓碑對稱邊框質感 */
+        .card-front {
+            background: #0d0202;
+            color: #555;
+            font-size: 1.2rem;
+            writing-mode: vertical-rl;
+            letter-spacing: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 15px #000;
+            transition: all 0.3s;
+            font-weight: 900;
+        }
+
+        /* 牌背重構：莊嚴古老的道門卜牌，絕無輕浮圖案 */
+        .card-back {
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 20px #000;
+            background: #080101;
+        }
+
+        .card-back span {
+            font-size: 1.6rem;
+            font-weight: 900;
+            writing-mode: vertical-rl;
+            letter-spacing: 5px;
+        }
+
+        /* 凶煞翻牌：乾涸血書感 */
+        .card-back.doom-back {
+            border: 1px solid #6a0000;
+        }
+        .card-back.doom-back span {
+            color: #6a0000;
+            text-shadow: 0 0 4px rgba(106, 0, 0, 0.6);
+        }
+
+        /* 吉慶翻牌：黯淡古金感（不破壞低亮度） */
+        .card-back.lucky-back {
+            border: 1px solid #856d24;
+        }
+        .card-back.lucky-back span {
+            color: #856d24;
+            text-shadow: 0 0 4px rgba(133, 109, 36, 0.6);
+        }
+
+        .stick-card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        /* 確定台詞 */
+        #decision-msg {
+            font-size: 1.6rem;
+            color: #5a0000;
+            font-weight: 900;
+            letter-spacing: 5px;
+            text-shadow: 0 0 8px #000;
+            height: 40px;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        #decision-msg.show {
+            opacity: 1;
+        }
+
+        /* --- 頁面 3：解籤大位（中式牌位式視覺） --- */
+        #result-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
+            background: rgba(3, 3, 3, 0.96);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .result-box {
+            background: #080101;
+            border: 1px solid #3a0000;
+            padding: 40px 25px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .result-box.doom-theme { border-color: #6a0000; box-shadow: 0 0 30px rgba(106, 0, 0, 0.4); }
+        .result-box.lucky-theme { border-color: #856d24; box-shadow: 0 0 30px rgba(133, 109, 36, 0.3); }
+
+        .result-fortune {
+            font-size: 2.5rem;
+            color: #6a0000;
+            margin-bottom: 25px;
+            font-weight: 900;
+            letter-spacing: 4px;
+        }
+
+        .result-fortune.lucky {
+            color: #856d24 !important;
+        }
+
+        .result-poem {
+            font-size: 1.35rem;
+            color: #999;
+            margin-bottom: 30px;
+            line-height: 2.4rem;
+            letter-spacing: 0.3rem;
+            white-space: pre-line;
+            font-weight: 600;
+        }
+
+        .result-analysis {
+            font-size: 0.95rem;
+            color: #555;
+            text-align: left;
+            border-top: 1px solid #1a0303;
+            padding-top: 20px;
+            line-height: 1.6rem;
+            letter-spacing: 1px;
+        }
+
+        .retry-btn {
+            margin-top: 35px;
+            background: #030303;
+            color: #444;
+            border: 1px solid #1a0303;
+            padding: 12px 30px;
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 2px;
+        }
+
+        .retry-btn:hover {
+            background: #150000;
+            color: #8b0000;
+            border-color: #5a0000;
+        }
+
+        /* --- 📱 手機端極致排版優化 --- */
+        @media (max-width: 600px) {
+            .temple-title { font-size: 2.8rem; letter-spacing: 0.4rem; }
+            .temple-subtitle { font-size: 0.9rem; margin-bottom: 3rem; }
+            .temple-layout { flex-direction: column; gap: 15px; }
+            .stick-container { width: 100px; height: 90px; }
+            .stick-container::before { top: 10px; padding: 4px 2px; font-size: 0.75rem; }
+            .sticks-grid { gap: 10px; }
+            .stick-card { width: 68px; height: 110px; }
+            .card-front { font-size: 1rem; }
+            .card-back span { font-size: 1.3rem; }
+            .result-fortune { font-size: 2rem; }
+            .result-poem { font-size: 1.2rem; line-height: 2rem; }
+        }
+
+        /* --- 🕯️ 陰森古典動畫庫 --- */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* 燭火搖曳微弱黑影特效（控制亮度不變） */
+        @keyframes candleFlicker {
+            0%, 100% { text-shadow: 0 0 10px #3a0000; opacity: 0.95; }
+            50% { text-shadow: 0 0 14px #5a0000, 0 0 2px #000; opacity: 1; }
+        }
+
+        /* 陰風血氣脈動 */
+        @keyframes ritualBloodPulse {
+            0% { box-shadow: inset 0 0 80px rgba(106, 0, 0, 0.6); }
+            100% { box-shadow: inset 0 0 14px rgba(106, 0, 0, 0.9); }
+        }
+        /* 厲鬼退散古金脈動 */
+        @keyframes ritualGoldPulse {
+            0% { box-shadow: inset 0 0 80px rgba(133, 109, 36, 0.3); }
+            100% { box-shadow: inset 0 0 140px rgba(133, 109, 36, 0.5); }
+        }
+
+        /* 震屏（煞氣衝撞） */
+        @keyframes ritualShake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            100% { transform: translate(-1px, -1px) rotate(-0.5deg); }
+        }
+        /* 懸浮（神明掌權） */
+        @keyframes ritualFloat {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-8px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 頁面 1：開始獻祭頁面 -->
+    <div id="intro-screen">
+        <h1 class="temple-title">陰府聖籤</h1>
+        <p class="temple-subtitle">── 命裡有時終須有，命裡無時莫強求 ──</p>
+        <button class="sacrifice-btn" id="start-btn">刺血求籤</button>
+    </div>
+
+    <!-- 頁面 2：抽籤主畫面 -->
+    <div id="game-screen" class="hidden">
+        <div class="game-header">
+            <h2>叩問天機</h2>
+            <p class="hint-text">鍵盤【↑↓←→】移步，【雙擊空白鍵】定奪。手機【直觸選籤】，【複觸】定命。</p>
+        </div>
+
+        <div class="temple-layout">
+            <div class="stick-container"></div>
+            <div class="sticks-grid" id="sticks-grid"></div>
+        </div>
+
+        <div id="decision-msg">就決定是你了</div>
+    </div>
+
+    <!-- 頁面 3：彈出式籤解詳細內容 -->
+    <div id="result-overlay" class="hidden">
+        <div class="result-box" id="result-box">
+            <div class="result-fortune" id="res-fortune">下下</div>
+            <div class="result-poem" id="res-poem"></div>
+            <div class="result-analysis" id="res-analysis"></div>
+            <button class="retry-btn" id="retry-btn">重整衣冠再卜</button>
+        </div>
+    </div>
+
+    <script>
+        // 正統古典文言文恐怖資料庫（嚴肅不輕浮）
+        const fortuneDatabase = [
+            { fortune: "【大吉】煞神迴避", isLucky: true, displayWord: "天赦", poem: "命火沖天百煞驚\n閻羅天子點姓名\n幽冥開路生人避\n萬鬼伏地不敢迎", analysis: "【解曰】極致大吉。你身上散發之陽剛氣血重如泰山，連地府陰差亦須禮讓三分。近期百無禁忌，諸邪遠遁。縱夜半行於荒塚，厲鬼見你亦伏地叩首。" },
+            { fortune: "【上上】五鬼搬運", isLucky: true, displayWord: "陰財", poem: "冥財破土入宅來\n半夜開門不見災\n偏財雖旺陰緣重\n莫忘燒香謝骨骸", analysis: "【解曰】財運爆棚。冥府破例免去你今生一劫，更差遣座下五鬼為你搬運陽間財富。近期偏財極盛，然此乃陰德所換，切記分潤行善，切莫貪得無厭。" },
+            { fortune: "【中吉】神威庇佑", isLucky: true, displayWord: "護法", poem: "黑白判官兩邊排\n城隍執筆賜福來\n凶神惡煞皆退散\n災厄化作蓮花開", analysis: "【解曰】逢凶化吉。雖有冤親債主隨行在後，但你祖上有大德，神明已落駕親身撐腰。近期若遭逢劫難，必能於絕境之中反將小人一軍。" },
+            { fortune: "【大凶】七七還魂", isLucky: false, displayWord: "劫煞", poem: "陰風入骨夜正深\n冤魂索命向家門\n不見生人還陽路\n唯留白骨伴孤墳", analysis: "【解曰】命懸一線。過去所犯下之口業與罪戾已化作索命惡鬼，如影隨形。近期子時切勿照鏡，若聽聞身後有莫名喚名之聲，萬不可回頭，否則魂飛魄散。" },
+            { fortune: "【凶】厲鬼鎖索", isLucky: false, displayWord: "有災", poem: "夜半啼哭窗外影\n莫問前程路怎行\n油盡燈枯冤債至\n因果報應何時停", analysis: "【解曰】業障現前。冤親債主已持地府通緝令至陽間索債。近期不宜遠行，更忌水路與白事。事事低調，莫與人爭風頭，方可苟延殘喘。" },
+            { fortune: "【下下】曝屍荒野", isLucky: false, displayWord: "歸泉", poem: "七魂飄零三魄散\n閻王判官兩相看\n油鍋刀山皆走過\n永世不得入陽間", analysis: "【解曰】氣數已盡。運勢已跌入無底深淵，神仙難救。當下切莫貪圖不義之財，亦不可作任何重大抉擇。近期多茹素、閉門謝客，或許能留得全屍。" }
+        ];
+
+        // 正統中式大寫數字
+        const traditionalNumbers = ["第壹籤", "第貳籤", "第參籤", "第肆籤", "第伍籤", "第陸籤", "第柒籤", "第捌籤", "第玖籤", "第拾籤", "第拾壹籤", "第拾貳籤"];
+
+        let shuffledPool = [];
+        let currentIndex = 0;
+        let lastSpaceTime = 0;
+        let isLocked = false; 
+        const ROWS = 3, COLS = 4, TOTAL_STICKS = 12;
+
+        const introScreen = document.getElementById('intro-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultOverlay = document.getElementById('result-overlay');
+        const startBtn = document.getElementById('start-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const sticksGrid = document.getElementById('sticks-grid');
+        const decisionMsg = document.getElementById('decision-msg');
+        const resFortune = document.getElementById('res-fortune');
+        const resultBox = document.getElementById('result-box');
+
+        function initGame() {
+            sticksGrid.innerHTML = '';
+            isLocked = false;
+            currentIndex = 0;
+            decisionMsg.classList.remove('show');
+            resultOverlay.classList.add('hidden');
+            resFortune.classList.remove('lucky');
+            
+            document.body.classList.remove('theme-doom', 'theme-hallowed');
+            gameScreen.classList.remove('shake-screen', 'float-screen');
+            resultBox.classList.remove('doom-theme', 'lucky-theme');
+
+            // 每次重抽皆洗牌
+            shuffledPool = [];
+            for (let i = 0; i < TOTAL_STICKS; i++) {
+                const randomFortune = fortuneDatabase[Math.floor(Math.random() * fortuneDatabase.length)];
+                shuffledPool.push(randomFortune);
+            }
+
+            // 渲染正統中式大寫籤牌
+            for (let i = 0; i < TOTAL_STICKS; i++) {
+                const card = document.createElement('div');
+                card.className = 'stick-card';
+                card.dataset.index = i;
+
+                const fortuneItem = shuffledPool[i];
+                const backClass = fortuneItem.isLucky ? 'lucky-back' : 'doom-back';
+
+                card.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front">${traditionalNumbers[i]}</div>
+                        <div class="card-back ${backClass}">
+                            <span>${fortuneItem.displayWord}</span>
+                        </div>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => {
+                    if (isLocked) return;
+                    const clickedIndex = parseInt(card.dataset.index);
+                    if (currentIndex === clickedIndex) {
+                        confirmSelection();
+                    } else {
+                        currentIndex = clickedIndex;
+                        updateSelection();
+                    }
+                });
+
+                sticksGrid.appendChild(card);
+            }
+            updateSelection();
+        }
+
+        function updateSelection() {
+            const cards = document.querySelectorAll('.stick-card');
+            cards.forEach((card, idx) => {
+                if (idx === currentIndex) card.classList.add('selected');
+                else card.classList.remove('selected');
+            });
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (gameScreen.classList.contains('hidden') || isLocked) return;
+            let r = Math.floor(currentIndex / COLS), c = currentIndex % COLS;
+            switch(e.key) {
+                case 'ArrowUp': if (r > 0) r--; e.preventDefault(); break;
+                case 'ArrowDown': if (r < ROWS - 1) r++; e.preventDefault(); break;
+                case 'ArrowLeft': if (c > 0) c--; e.preventDefault(); break;
+                case 'ArrowRight': if (c < COLS - 1) c++; e.preventDefault(); break;
+                case ' ': e.preventDefault(); handleSpacebar(); return;
+                default: return;
+            }
+            currentIndex = r * COLS + c;
+            updateSelection();
+        });
+
+        function handleSpacebar() {
+            const now = Date.now();
+            if (now - lastSpaceTime < 300 && now - lastSpaceTime > 0) confirmSelection();
+            lastSpaceTime = now;
+        }
+
+        function confirmSelection() {
+            isLocked = true;
+            decisionMsg.classList.add('show');
+
+            const cards = document.querySelectorAll('.stick-card');
+            const selectedEvtCard = cards[currentIndex];
+            const finalFortune = shuffledPool[currentIndex];
+
+            setTimeout(() => {
+                selectedEvtCard.classList.add('flipped');
+                
+                // 環境劇烈變化觸發
+                if (finalFortune.isLucky) {
+                    document.body.classList.add('theme-hallowed');
+                    gameScreen.classList.add('float-screen');
+                    resultBox.classList.add('lucky-theme');
+                } else {
+                    document.body.classList.add('theme-doom');
+                    gameScreen.classList.add('shake-screen');
+                    resultBox.classList.add('doom-theme');
+                }
+                
+                setTimeout(() => {
+                    resFortune.innerText = finalFortune.fortune;
+                    if (finalFortune.isLucky) resFortune.classList.add('lucky');
+                    else resFortune.classList.remove('lucky');
+
+                    document.getElementById('res-poem').innerHTML = finalFortune.poem.replace(/\n/g, '<br>');
+                    document.getElementById('res-analysis').innerText = finalFortune.analysis;
+                    
+                    resultOverlay.classList.remove('hidden');
+                }, 1200);
+
+            }, 1000);
+        }
+
+        startBtn.addEventListener('click', () => {
+            introScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            initGame();
+        });
+
+        retryBtn.addEventListener('click', () => {
+            initGame();
+        });
+    </script>
+</body>
+</html>
